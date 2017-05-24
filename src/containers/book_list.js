@@ -6,6 +6,10 @@
 import React, { Component } from 'react';
 //This is a library that connects redux and react to work together
 import { connect } from 'react-redux';
+//grabs function from actions.index.js
+import { selectBook } from '../actions/index';
+//this allows the object returned from the action creator to flow throughout all the reducers
+import { bindActionCreators } from 'redux';
 
 class BookList extends Component {
 
@@ -14,7 +18,13 @@ class BookList extends Component {
   renderList() {
     return this.props.books.map((book) => {
       return (
-        <li className="list-group-item" key={book.title}>
+        <li
+          className="list-group-item"
+          key={book.title}
+          //this renders whatever is shown in actions/index.js
+		      //"book" is being passed an argument because book represents
+          //the data needed in "book.title" in actions/index.js
+		      onClick={() => this.props.bookSelected(book)}>
           {book.title}
         </li>
       );
@@ -37,12 +47,21 @@ class BookList extends Component {
 function mapStateToProps(state) {
 	//whatever is returned will be show up as prps inside BookList
 	return {
-		//"books" is the prop from "renderList()" above
-		// "books" from "state.books" is grabbed from "reducers/index.js" which is the array from "src/components.app.js"
+		//"books" passes the prop to "renderList()" above
+    //You can now call "this.props.books" in the function above
+		// "books" from "state.books" is grabbed from "reducers/index.js" which is the array from "reducer_books.js"
 		books: state.books
 	};
 }
 
+//Anything returned from this function will end up as props on the BookList container
+function mapDispatchToProps(dispatch) {
+	//"bookSelected" can now be passed a prop (this.props.bookSelected) which is our action creator
+	//"selectBook" is what we imported from actions/index.js
+	//"bindActionCreators" and "dispatch" means whenever the "selectBook" is called, the result should be passed to all reducers
+	return bindActionCreators ({bookSelected: selectBook}, dispatch)
+}
+
 //connect takes 2 arguments. This bridges the state and react.
 //connect(state function)(the container)
-export default connect(mapStateToProps)(BookList);
+export default connect(mapStateToProps, mapDispatchToProps)(BookList);
